@@ -1,0 +1,22 @@
+{
+  "name": "confamo",
+  "version": "1.0.3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "Jeremy Wells",
+    "email": "jemmyw@gmail.com"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1.4",
+    "bluebird": "^2.4.2",
+    "debug": "^2.1.2"
+  },
+  "readme": "ERROR: No README data found!",
+  "_id": "confamo@1.0.2",
+  "_shasum": "6699e801909cf47b87c385f51b5852e669ac66fb",
+  "_from": "confamo@1.0.2"
+}
