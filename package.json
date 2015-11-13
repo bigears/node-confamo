@@ -1,22 +1,26 @@
 {
   "name": "confamo",
   "description": "Retrieve configuration from Amazon DynamoDB",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": {
-    "name": "Jeremy Wells",
-    "email": "jemmyw@gmail.com"
-  },
+  "author": "Jeremy Wells <jemmyw@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1.4",
     "bluebird": "^2.4.2",
     "debug": "^2.1.2"
   },
-  "_id": "confamo@1.0.2",
   "_shasum": "6699e801909cf47b87c385f51b5852e669ac66fb",
-  "_from": "confamo@1.0.2"
+  "_from": "confamo@1.0.2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bigears/node-confamo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bigears/node-confamo/issues"
+  },
+  "homepage": "https://github.com/bigears/node-confamo#readme"
 }
