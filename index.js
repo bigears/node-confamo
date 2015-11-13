@@ -2,9 +2,13 @@ var AWS = require('aws-sdk');
 var Promise = require('bluebird');
 var debug = require('debug')('confamo');
 
-var dynamodb = Promise.promisifyAll(new AWS.DynamoDB({
-  region: 'eu-central-1'
-}));
+var awsConfig = {};
+if(process.env['REGION']) {
+  awsConfig.region = process.env['REGION'];
+}
+
+var dynamodb = Promise.promisifyAll(new AWS.DynamoDB(awsConfig));
+var tableName = process.env['CONFAMO_TABLE'] || 'config';
 
 var conversions = {
   L: function(value) {
@@ -22,8 +26,7 @@ var conversions = {
   }
 };
 
-function convertCfgValue(cfgItem)
-{
+function convertCfgValue(cfgItem) {
   var keys = Object.keys(cfgItem);
 
   for(var i = 0; i < keys.length; i+=1) {
@@ -35,20 +38,21 @@ function convertCfgValue(cfgItem)
   return cfgItem[keys[0]];
 }
 
-function convertCfgItem (key, cfgItem)
-{
+function convertCfgItem (key, cfgItem) {
   var obj = {};
   obj[key] = convertCfgValue(cfgItem);
   return obj;
 }
 
 
-module.exports = function (environment)
-{
-  return function (key)
-  {
+module.exports = function (environment) {
+  if(!environment) {
+    environment = process.env["ENVIRONMENT"];
+  }
+
+  return function (key) {
     return dynamodb.getItemAsync({
-      TableName: 'config',
+      TableName: tableName,
       Key: {
         environment: {
           S: environment
@@ -57,8 +61,7 @@ module.exports = function (environment)
           S: key
         }
       }
-    }).then(function(response)
-    {
+    }).then(function(response) {
       var value = response.Item.value;
       debug('loaded config', value);
       var convertedValue = convertCfgValue(value);

@@ -1,5 +1,6 @@
 {
   "name": "confamo",
+  "description": "Retrieve configuration from Amazon DynamoDB",
   "version": "1.0.3",
   "main": "index.js",
   "scripts": {
@@ -15,7 +16,6 @@
     "bluebird": "^2.4.2",
     "debug": "^2.1.2"
   },
-  "readme": "ERROR: No README data found!",
   "_id": "confamo@1.0.2",
   "_shasum": "6699e801909cf47b87c385f51b5852e669ac66fb",
   "_from": "confamo@1.0.2"
