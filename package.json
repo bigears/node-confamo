@@ -1,7 +1,7 @@
 {
   "name": "confamo",
   "description": "Retrieve configuration from Amazon DynamoDB",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
