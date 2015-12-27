@@ -11,7 +11,8 @@
   "dependencies": {
     "aws-sdk": "^2.1.4",
     "bluebird": "^2.4.2",
-    "debug": "^2.1.2"
+    "debug": "^2.1.2",
+    "dynamodb-data-types": "^2.1.2"
   },
   "_shasum": "6699e801909cf47b87c385f51b5852e669ac66fb",
   "_from": "confamo@1.0.2",

@@ -1,4 +1,5 @@
 var AWS = require('aws-sdk');
+var attr = require('dynamodb-data-types').AttributeValue;
 var Promise = require('bluebird');
 var debug = require('debug')('confamo');
 
@@ -9,41 +10,6 @@ if(process.env['REGION']) {
 
 var dynamodb = Promise.promisifyAll(new AWS.DynamoDB(awsConfig));
 var tableName = process.env['CONFAMO_TABLE'] || 'config';
-
-var conversions = {
-  L: function(value) {
-    return value.map(convertCfgValue);
-  },
-  M: function(value) {
-    var obj = {};
-
-    Object.keys(value).forEach(function(key)
-    {
-      obj[key] = convertCfgValue(value[key]);
-    });
-
-    return obj;
-  }
-};
-
-function convertCfgValue(cfgItem) {
-  var keys = Object.keys(cfgItem);
-
-  for(var i = 0; i < keys.length; i+=1) {
-    if (conversions[keys[i]] && conversions[keys[i]].call) {
-      return conversions[keys[i]].call(this, cfgItem[keys[i]]);
-    }
-  }
-
-  return cfgItem[keys[0]];
-}
-
-function convertCfgItem (key, cfgItem) {
-  var obj = {};
-  obj[key] = convertCfgValue(cfgItem);
-  return obj;
-}
-
 
 module.exports = function (environment) {
   if(!environment) {
@@ -62,12 +28,8 @@ module.exports = function (environment) {
         }
       }
     }).then(function(response) {
-      debug('confamo response', response);
-      var value = response.Item.value;
-      debug('loaded config', value);
-      var convertedValue = convertCfgValue(value);
-      debug('converted config', convertedValue);
-      return convertedValue;
+      if(!response.Item) { return null; }
+      return attr.unwrap(response.Item).value;
     });
   };
 };
