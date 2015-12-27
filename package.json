@@ -4,7 +4,7 @@
   "version": "1.0.4",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node_modules/.bin/mocha"
   },
   "author": "Jeremy Wells <jemmyw@gmail.com>",
   "license": "ISC",
@@ -22,5 +22,12 @@
   "bugs": {
     "url": "https://github.com/bigears/node-confamo/issues"
   },
-  "homepage": "https://github.com/bigears/node-confamo#readme"
+  "homepage": "https://github.com/bigears/node-confamo#readme",
+  "devDependencies": {
+    "mocha": "^2.3.4",
+    "rewire": "^2.5.1",
+    "sinon": "^1.17.2",
+    "unexpected": "^10.5.0",
+    "unexpected-sinon": "^9.0.4"
+  }
 }

@@ -62,6 +62,7 @@ module.exports = function (environment) {
         }
       }
     }).then(function(response) {
+      debug('confamo response', response);
       var value = response.Item.value;
       debug('loaded config', value);
       var convertedValue = convertCfgValue(value);
