@@ -13,8 +13,10 @@ var tableName = process.env['CONFAMO_TABLE'] || 'config';
 
 var ConfigItem = function(key, options) {
   this.key = key;
-  this.options = options;
-  this.scheduleRefresh();
+  this.environment = options.environment;
+  this.refresh = options.refresh;
+  this._updating = false;
+  setImmediate(this.update.bind(this));
 }
 util.inherits(ConfigItem, EventEmitter);
 ConfigItem.prototype.then = function(cb) {
@@ -26,38 +28,43 @@ ConfigItem.prototype.then = function(cb) {
       reject(err);
     });
   }.bind(this));
-
-  setImmediate(this.update.bind(this));
 };
-ConfigItem.prototype.update = function(cb) {
-  if(!cb) cb = function(){};
+ConfigItem.prototype.update = function() {
+  if(this.updating) { return; }
+  this.updating = true;
 
   dynamodb.getItem({
     TableName: tableName,
     Key: {
-      environment: { S: this.options.environment },
+      environment: { S: this.environment },
       key: { S: this.key }
     }
   }, function(err, res) {
-    if(err) { return this.emit('error', err); cb(err); }
-    if(!res.Item) { return this.emit('error', 'No data'); cb(null, null); }
+    this.updating = false;
+    this.scheduleRefresh();
+
+    if(err) { return this.emit('error', err); }
+    if(!res.Item) { return this.emit('error', 'No data'); }
 
     var data = attr.unwrap(res.Item).value;
     this.emit('data', data);
-    cb(null, data);
   }.bind(this));
 };
 ConfigItem.prototype.scheduleRefresh = function() {
-  if(this.refreshTimer) clearTimeout(this.refreshTimer);
+  if(this.refreshTimer) {
+    clearTimeout(this.refreshTimer);
+    this.refreshTimer = null;
+  }
 
-  if(this.options.refresh) {
+  if(this.refresh) {
     var self = this;
-
-    self.refreshTimer = setTimeout(function() {
-      self.update(self.scheduleRefresh());
-    }, self.options.refresh);
+    this.refreshTimer = setTimeout(this.update.bind(this), this.refresh);
   }
 };
+ConfigItem.prototype.stop = function() {
+  if(this.refreshTimer) { clearTimeout(this.refreshTimer); }
+  this.refresh = null;
+}
 
 module.exports = function (environment) {
   if(!environment) {

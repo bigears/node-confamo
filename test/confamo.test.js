@@ -1,3 +1,4 @@
+'use strict'
 var expect = require('unexpected').clone();
 expect.installPlugin(require('unexpected-sinon'));
 var sinon = require('sinon');
@@ -28,18 +29,18 @@ describe('confamo', function() {
     });
 
     var conf = confamo()('app');
+
     conf.on('data', function(data) {
+      expect(dynamodb.getItem, 'was called with', {
+        TableName: 'config',
+        Key: {
+          environment: { S: 'test' },
+          key: { S: 'app' }
+        }
+      });
+
       expect(data, 'to equal', {"config_key": "string_value"});
       done();
-    });
-    conf.update();
-
-    expect(dynamodb.getItem, 'was called with', {
-      TableName: 'config',
-      Key: {
-        environment: { S: 'test' },
-        key: { S: 'app' }
-      }
     });
   });
 
@@ -101,21 +102,23 @@ describe('confamo', function() {
         cb(null, {Item: {"value": {"M": {"config_key": {"S": "string_value"}}}}});
       });
 
-      var conf = confamo()('app', {refresh: 500});
+      var options = {refresh: 100};
       var confRecevied = 0;
+      var conf = confamo()('app', options);
 
       conf.on('data', function(data) {
+        expect(dynamodb.getItem, 'was called with', {
+          TableName: 'config',
+          Key: {
+            environment: { S: 'test' },
+            key: { S: 'app' }
+          }
+        });
         expect(data, 'to equal', {"config_key": "string_value"});
         confRecevied += 1;
-        if(confRecevied === 2) done();
-      });
-      conf.update();
-
-      expect(dynamodb.getItem, 'was called with', {
-        TableName: 'config',
-        Key: {
-          environment: { S: 'test' },
-          key: { S: 'app' }
+        if(confRecevied === 3) {
+          conf.stop();
+          done();
         }
       });
     });
