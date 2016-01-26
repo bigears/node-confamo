@@ -94,4 +94,30 @@ describe('confamo', function() {
     return confamo()('app').then(conf =>
       expect(conf, 'to equal', { string: 'test', number: 123, array: ['a1', 'a2'] }));
   });
+
+  describe('refresh', function() {
+    it('calls the data event at intervals', function(done) {
+      dynamodb.getItem = sinon.spy(function(options, cb) {
+        cb(null, {Item: {"value": {"M": {"config_key": {"S": "string_value"}}}}});
+      });
+
+      var conf = confamo()('app', {refresh: 500});
+      var confRecevied = 0;
+
+      conf.on('data', function(data) {
+        expect(data, 'to equal', {"config_key": "string_value"});
+        confRecevied += 1;
+        if(confRecevied === 2) done();
+      });
+      conf.update();
+
+      expect(dynamodb.getItem, 'was called with', {
+        TableName: 'config',
+        Key: {
+          environment: { S: 'test' },
+          key: { S: 'app' }
+        }
+      });
+    });
+  });
 });

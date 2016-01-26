@@ -14,6 +14,7 @@ var tableName = process.env['CONFAMO_TABLE'] || 'config';
 var ConfigItem = function(key, options) {
   this.key = key;
   this.options = options;
+  this.scheduleRefresh();
 }
 util.inherits(ConfigItem, EventEmitter);
 ConfigItem.prototype.then = function(cb) {
@@ -28,7 +29,9 @@ ConfigItem.prototype.then = function(cb) {
 
   setImmediate(this.update.bind(this));
 };
-ConfigItem.prototype.update = function() {
+ConfigItem.prototype.update = function(cb) {
+  if(!cb) cb = function(){};
+
   dynamodb.getItem({
     TableName: tableName,
     Key: {
@@ -36,11 +39,25 @@ ConfigItem.prototype.update = function() {
       key: { S: this.key }
     }
   }, function(err, res) {
-    if(err) { return this.emit('error', err); }
-    if(!res.Item) { return this.emit('error', 'No data'); }
-    this.emit('data', attr.unwrap(res.Item).value);
+    if(err) { return this.emit('error', err); cb(err); }
+    if(!res.Item) { return this.emit('error', 'No data'); cb(null, null); }
+
+    var data = attr.unwrap(res.Item).value;
+    this.emit('data', data);
+    cb(null, data);
   }.bind(this));
-}
+};
+ConfigItem.prototype.scheduleRefresh = function() {
+  if(this.refreshTimer) clearTimeout(this.refreshTimer);
+
+  if(this.options.refresh) {
+    var self = this;
+
+    self.refreshTimer = setTimeout(function() {
+      self.update(self.scheduleRefresh());
+    }, self.options.refresh);
+  }
+};
 
 module.exports = function (environment) {
   if(!environment) {
