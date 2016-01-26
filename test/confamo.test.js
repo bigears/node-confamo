@@ -22,13 +22,19 @@ describe('confamo', function() {
     expect(confamo(), 'to be a function');
   });
 
-  it('fetches from the test environment by default', function() {
-    dynamodb.getItemAsync = sinon.spy(function(options) {
-      return Promise.resolve({});
+  it('fetches from the test environment by default', function(done) {
+    dynamodb.getItem = sinon.spy(function(options, cb) {
+      cb(null, {Item: {"value": {"M": {"config_key": {"S": "string_value"}}}}});
     });
 
     var conf = confamo()('app');
-    expect(dynamodb.getItemAsync, 'was called with', {
+    conf.on('data', function(data) {
+      expect(data, 'to equal', {"config_key": "string_value"});
+      done();
+    });
+    conf.update();
+
+    expect(dynamodb.getItem, 'was called with', {
       TableName: 'config',
       Key: {
         environment: { S: 'test' },
